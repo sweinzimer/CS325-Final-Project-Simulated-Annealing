@@ -1,0 +1,8 @@
+To run please run make in folder location
+
+To run please enter sa "filename"
+
+the program will always run 1 iteration, if that takes less than the time limit it will attempt to run additional improvements
+these will continue until it can find no improvement or it will run out of time
+the default limit is 180 seconds
+

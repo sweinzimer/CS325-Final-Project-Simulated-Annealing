@@ -16,23 +16,25 @@ struct City
 
 
 
-const std::string outFileName =  "tsp_example_3.txt.tour";
-const std::string fileName =  "tsp_example_3.txt";
+std::string outFileName =  "tsp_example_2.txt.tour";
+ std::string fileName =  "tsp_example_2.txt";
 
 
 
 int shortDistance = INT32_MAX;
 std::vector<City> shortPath;
 bool isLowerFlag = false;
-void PrintDistance(int currDistance, std::vector<City> currPath, int itr)
+bool foundBetterInItr = false;
+void PrintDistance()
 {
    
     
     if(isLowerFlag)
        {
            isLowerFlag = false;
+           foundBetterInItr = true;
             std::ofstream outfile(outFileName);
-        std::cout << itr << " Distance is now :> " << shortDistance << std::endl;
+        //std::cout << itr << " Distance is now :> " << shortDistance << std::endl;
       
         
         outfile << shortDistance << std::endl;
@@ -86,7 +88,7 @@ std::vector<City> GetRandomPath(std::vector<City> oldPath)
     
     std::vector<City> newPath;
     int randPoint = rand() % (oldPath.size()-1);
-    int randPoint2 = rand() % (oldPath.size()-1 - randPoint) + randPoint;
+    int randPoint2 = (rand() % (oldPath.size()-1 - randPoint) )+ randPoint;
    // std::cout << "swapping at " << randPoint << "at " << randPoint +1 << std::endl;
     int k=1;
     for(int i =0; i < randPoint; i++)
@@ -149,8 +151,8 @@ float SimulatedAnealing(double ti, std::vector<City> cities, double coolingRate,
       // PrintDistance(currDistance, currPath, itr);
         
     }
-    PrintDistance(currDistance, currPath, itr);
-  std::cout << itr << ":" << worseCount << std::endl;
+    PrintDistance();
+  //std::cout << itr << ":" << worseCount << std::endl;
 t2= clock();
 float diff = t2-t1;
 float runTime = diff/ CLOCKS_PER_SEC;
@@ -158,9 +160,17 @@ float runTime = diff/ CLOCKS_PER_SEC;
 return runTime;
 }
 
-int main()
+int main(int argc, char **argv)
 {
-   
+    
+   if(argc!=2)
+  { 
+      std::cout << "Please eneter the input file name" << std::endl;
+    return -1;
+}
+
+    fileName = argv[1];
+    outFileName = fileName + ".tour";
     
     srand (time(NULL));
     
@@ -203,14 +213,24 @@ int main()
     values.pop_back();
     double temperature = 999999999999999999999999999999999999999999.0;
    float currTime=0;
-   float timeLimt = 10 * 60;
+   float timeLimt = 3 * 60;
    int runCount = 0;
    shortPath = values;
    while(currTime < timeLimt)
    {
     std::vector<City> runValues = shortPath;
-      currTime+=  SimulatedAnealing(temperature, runValues, 0.99, .0000001);
+      double thisTime =  SimulatedAnealing(temperature, runValues, 0.999, .0000001);
       runCount++;
+     if(!foundBetterInItr)
+        break;
+    else
+        foundBetterInItr = false;
+        
+   if(timeLimt - currTime < (thisTime + currTime))
+        break;
+   else
+        std::cout <<"Time left (s) :>" << timeLimt - currTime << " Iteration: " << runCount <<  std::endl;
+      currTime += thisTime;
    }
         
       std::cout << "Ran SA " << runCount << " times in " << currTime << " sec." << std::endl;
